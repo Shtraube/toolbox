@@ -35,7 +35,7 @@ def file_name_change(root_path: str, curr_path: str,
     return new_name
 
 
-def sort_files(start_dir: str, second_dir=''):
+def sort_files(start_dir: str, second_dir='') -> bool:
     """Функция, производящая сортировку файлов."""
     new_dirs = {}
     root_dir = start_dir
@@ -43,7 +43,7 @@ def sort_files(start_dir: str, second_dir=''):
         start_dir = second_dir
 
     if not os.access(start_dir, os.R_OK | os.W_OK | os.X_OK):
-        return
+        return False
 
     current_files = [file for file in os.listdir(start_dir)
                      if os.path.isfile(os.path.join(start_dir, file))]
@@ -71,7 +71,7 @@ def sort_files(start_dir: str, second_dir=''):
         sort_files(root_dir, dir_path)
         os.rmdir(dir_path)
 
-    return
+    return True
 
 
 class Settings:
@@ -131,11 +131,11 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('Ящик')
         self.setWindowIcon(QIcon(os.path.join(basedir,
-                                 'wooden-box-label.png')))
+                                 'wooden-box-label.ico')))
 
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(QIcon(os.path.join(basedir,
-                                     'wooden-box-label.png')))
+                                     'wooden-box-label.ico')))
         self.tray_menu = QMenu()
         exit_action = QAction('Закрыть приложение', self)
         exit_action.triggered.connect(self.quit)
@@ -192,11 +192,20 @@ class MainWindow(QMainWindow):
     def file_sort(self):
         """Метод, запускающий сортировку файлов."""
         if self.ui.lineEdit.text():
-            sort_files(self.ui.lineEdit.text())
-            QMessageBox.information(self, 'Задача выполнена',
-                                    'Сортировка и перенос файлов по адресу '
-                                    f'{self.ui.lineEdit.text()} завершены.')
-            self.ui.lineEdit.setText('')
+            result = sort_files(self.ui.lineEdit.text())
+            if result:
+                QMessageBox.information(self, 'Задача выполнена',
+                                        'Сортировка и перенос файлов по'
+                                        ' адресу '
+                                        f'{self.ui.lineEdit.text()}'
+                                        ' завершены.')
+                self.ui.lineEdit.setText('')
+            else:
+                QMessageBox.information(self, 'Задача не выполнена',
+                                        'Сортировка и перенос файлов по'
+                                        ' адресу '
+                                        f'{self.ui.lineEdit.text()}'
+                                        ' запрещены правами доступа.')
 
     def quit(self):
         """Метод выхода из приложения."""
@@ -232,6 +241,7 @@ class MainWindow(QMainWindow):
 def main():
     """Главная функция приложения, создание и запуск главного окна."""
     app = QApplication()
+    app.setWindowIcon(QIcon(os.path.join(basedir, 'wooden-box-label.ico')))
     app.setQuitOnLastWindowClosed(False)
     window = MainWindow()
     window.show()

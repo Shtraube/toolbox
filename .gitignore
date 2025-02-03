@@ -13,3 +13,6 @@ multiple_windows.py
 test_gui.py
 test.py
 toolbar_icons_demo.py
+toolbox.spec
+output
+.mypy_cache
